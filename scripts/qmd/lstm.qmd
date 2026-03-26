@@ -94,37 +94,25 @@ inicio_golfo = pd.to_datetime('1990-08-02')
 fim_golfo = pd.to_datetime('1991-02-28')
 duracao_golfo = fim_golfo - inicio_golfo # Descobre quantos dias durou
 
-# Subtrai e soma a duração exata para criar a janela proporcional
-start_golfo_cauda = inicio_golfo - (duracao_golfo / 2)
-end_golfo_cauda = fim_golfo + (duracao_golfo / 2)
-
 # --- IRAQUE ---
 inicio_iraque = pd.to_datetime('2003-03-20')
 fim_iraque = pd.to_datetime('2003-12-13')
 duracao_iraque = fim_iraque - inicio_iraque # Descobre quantos dias durou
 
-# Subtrai e soma a duração exata para criar a janela proporcional
-start_iraque_cauda = inicio_iraque - (duracao_iraque / 2)
-end_iraque_cauda = fim_iraque + (duracao_iraque / 2)
-
 # --- CONTEXTO ATUAL ---
 inicio_atual = pd.to_datetime('2026-02-28')
-fim_atual = pd.to_datetime('2026-03-24')
+fim_atual = pd.to_datetime('2026-03-26')
 duracao_atual = fim_atual - inicio_atual
 
-# Subtrai e soma a duração exata para criar a janela proporcional
-start_atual_cauda = inicio_atual - (duracao_atual / 2)
-end_atual_cauda = fim_atual + (duracao_atual / 2)
-
-print(f"Janela Dinâmica do Golfo: {start_golfo.date()} até {end_golfo.date()} (Cauda de {duracao_golfo.days} dias)")
-print(f"Janela Dinâmica do Iraque: {start_iraque.date()} até {end_iraque.date()} (Cauda de {duracao_iraque.days} dias)")
-print(f"Janela Dinâmica Atual: {start_atual_cauda.date()} até {end_atual_cauda.date()} (Cauda de {duracao_atual.days} dias)")
+print(f"Janela do Golfo: {inicio_golfo.date()} até {fim_golfo.date()}")
+print(f"Janela do Iraque: {inicio_iraque.date()} até {fim_iraque.date()}")
+print(f"Janela Atual: {inicio_atual.date()} até {fim_atual.date()}")
 
 # 2. Baixando os Dados com as novas datas proporcionais
 tickers = ['XOM', 'CVX', 'SHEL']
-df_golfo = yf.download(tickers, start=start_golfo_cauda, end=end_golfo_cauda, threads=False)['Close'].ffill()
-df_iraque = yf.download(tickers, start=start_iraque_cauda, end=end_iraque_cauda, threads=False)['Close'].ffill()
-df_atual = yf.download(tickers, start=start_atual_cauda, end=end_atual_cauda, threads=False)['Close'].ffill()
+df_golfo = yf.download(tickers, start=inicio_golfo, end=fim_golfo, threads=False)['Close'].ffill()
+df_iraque = yf.download(tickers, start=inicio_iraque, end=fim_iraque, threads=False)['Close'].ffill()
+df_atual = yf.download(tickers, start=inicio_atual, end=fim_atual, threads=False)['Close'].ffill()
 
 # 3. Normalização (Base 100)
 df_golfo_norm = (df_golfo / df_golfo.iloc[0]) * 100
@@ -139,10 +127,8 @@ axes[0].plot(df_golfo_norm.index, df_golfo_norm['XOM'], label='Exxon (XOM)', lin
 axes[0].plot(df_golfo_norm.index, df_golfo_norm['CVX'], label='Chevron (CVX)', linewidth=2)
 axes[0].plot(df_golfo_norm.index, df_golfo_norm['SHEL'], label='Shell (SHEL)', linewidth=2)
 
-axes[0].set_title('Laboratório Geopolítico: Guerra do Golfo (Cauda Proporcional 0.5x)', fontsize=14, fontweight='bold')
+axes[0].set_title('Guerra do Golfo', fontsize=14, fontweight='bold')
 axes[0].set_ylabel('Preço Normalizado (Base 100)')
-axes[0].grid(True, linestyle='--', alpha=0.5)
-axes[0].axvspan(inicio_golfo, fim_golfo, color='red', alpha=0.15, label='Período Oficial da Guerra')
 axes[0].legend()
 axes[0].xaxis.set_major_locator(mdates.MonthLocator(interval=2))
 axes[0].xaxis.set_major_formatter(mdates.DateFormatter('%b %Y'))
@@ -152,61 +138,94 @@ axes[1].plot(df_iraque_norm.index, df_iraque_norm['XOM'], label='Exxon (XOM)', l
 axes[1].plot(df_iraque_norm.index, df_iraque_norm['CVX'], label='Chevron (CVX)', linewidth=2)
 axes[1].plot(df_iraque_norm.index, df_iraque_norm['SHEL'], label='Shell (SHEL)', linewidth=2)
 
-axes[1].set_title('Laboratório Geopolítico: Guerra do Iraque (Cauda Proporcional 0.5x)', fontsize=14, fontweight='bold')
+axes[1].set_title('Guerra do Iraque', fontsize=14, fontweight='bold')
 axes[1].set_ylabel('Preço Normalizado (Base 100)')
-axes[1].grid(True, linestyle='--', alpha=0.5)
-axes[1].axvspan(inicio_iraque, fim_iraque, color='red', alpha=0.15, label='Período Oficial da Guerra')
 axes[1].legend()
 axes[1].xaxis.set_major_locator(mdates.MonthLocator(interval=2))
 axes[1].xaxis.set_major_formatter(mdates.DateFormatter('%b %Y'))
 
 # --- GRÁFICO 3: Contexto Atual ---
-axes[0].plot(df_atual_norm.index, df_atual_norm['XOM'], label='Exxon (XOM)', linewidth=2)
-axes[0].plot(df_atual_norm.index, df_atual_norm['CVX'], label='Chevron (CVX)', linewidth=2)
-axes[0].plot(df_atual_norm.index, df_atual_norm['SHEL'], label='Shell (SHEL)', linewidth=2)
+axes[2].plot(df_atual_norm.index, df_atual_norm['XOM'], label='Exxon (XOM)', linewidth=2)
+axes[2].plot(df_atual_norm.index, df_atual_norm['CVX'], label='Chevron (CVX)', linewidth=2)
+axes[2].plot(df_atual_norm.index, df_atual_norm['SHEL'], label='Shell (SHEL)', linewidth=2)
 
-axes[1].set_title('Laboratório Geopolítico: Guerra Atual (Cauda Proporcional 0.5x)', fontsize=14, fontweight='bold')
-axes[1].set_ylabel('Preço Normalizado (Base 100)')
-axes[1].grid(True, linestyle='--', alpha=0.5)
-axes[1].axvspan(inicio_atual, fim_atual, color='red', alpha=0.15, label='Período Oficial da Guerra')
-axes[1].legend()
-axes[1].xaxis.set_major_locator(mdates.MonthLocator(interval=2))
-axes[1].xaxis.set_major_formatter(mdates.DateFormatter('%b %Y'))
+axes[2].set_title('Guerra Atual', fontsize=14, fontweight='bold')
+axes[2].set_ylabel('Preço Normalizado (Base 100)')
+axes[2].legend()
+axes[2].xaxis.set_major_locator(mdates.MonthLocator(interval=2))
+axes[2].xaxis.set_major_formatter(mdates.DateFormatter('%b %Y'))
 
 plt.tight_layout()
 plt.show()
 ```
 
 ```{python}
-import pandas as pd
-import yfinance as yf
+import numpy as np
+from sklearn.preprocessing import MinMaxScaler
 
-tickers = ['XOM', 'CVX', 'SHEL']
+# Definindo a função de indicadores técnicos
+def add_indicators(df, col='Close', window=14):
+    df[f'SMA_{window}'] = df[col].rolling(window=window).mean()
+    df[f'EMA_{window}'] = df[col].ewm(span=window, adjust=False).mean()
+    delta = df[col].diff()
+    gain = delta.clip(lower=0)
+    loss = -delta.clip(upper=0)
+    avg_gain = gain.rolling(window=window).mean()
+    avg_loss = loss.rolling(window=window).mean()
+    rs = avg_gain / avg_loss
+    df[f'RSI_{window}'] = 100 - (100 / (1 + rs))
+    return df
 
+# Função para extrair dados sem vazar dados entre as guerras
 def get_period_data(tickers, start_date, end_date):
-    period_dfs = [] # Lista local, morre quando a função termina
+    period_dfs = []
     for t in tickers:
         df = yf.download(t, start=start_date, end=end_date, threads=False)
-        # Garantindo que pegamos apenas a série de fechamento (Close)
+        # Tratamento para multi-index em versões recentes do yfinance
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.droplevel(1)
         df = df[['Close']].rename(columns={'Close': f'{t}_Close'})
         df = add_indicators(df, col=f'{t}_Close', window=14)
         period_dfs.append(df)
-    
     return pd.concat(period_dfs, axis=1).dropna()
 
-# Processando cada período de forma isolada
-data_golfo = get_period_data(tickers, start_golfo_cauda, end_golfo_cauda)
-data_iraque = get_period_data(tickers, start_iraque_cauda, end_iraque_cauda)
+# Usando as variáveis exatas que você definiu no seu novo código
+data_golfo = get_period_data(tickers, inicio_golfo, fim_golfo)
+data_iraque = get_period_data(tickers, inicio_iraque, fim_iraque)
+data_atual = get_period_data(tickers, inicio_atual, fim_atual)
 
-print(data_golfo.tail())
-print(data_iraque.tail())
+# Normalização SEM VAZAMENTO (Treina o scaler só no passado)
+data_treino_historico = pd.concat([data_golfo, data_iraque])
+scaler = MinMaxScaler()
+scaler.fit(data_treino_historico)
+
+# Aplica a mesma escala para todos
+scaled_golfo = scaler.transform(data_golfo)
+scaled_iraque = scaler.transform(data_iraque)
+scaled_atual = scaler.transform(data_atual)
 ```
 
 ```{python}
-from sklearn.preprocessing import MinMaxScaler
+def create_multivariate_sequences(data, seq_len):
+    X, y = [], []
+    for i in range(seq_len, len(data)):
+        X.append(data[i-seq_len:i])
+        y.append(data[i, 0])  # O índice 0 é o XOM_Close (Exxon)
+    return np.array(X), np.array(y)
 
-# Normalizando os dados multivariados
-scaler = MinMaxScaler()
-scaled_golfo = scaler.fit_transform(data_golfo)
-scaled_iraque = scaler.fit_transform(data_iraque)
+# Reduzido para 3 devido ao tamanho da janela "Atual" do seu código
+seq_len = 3 
+
+# Criando as janelas de treino (Golfo + Iraque)
+X_golfo, y_golfo = create_multivariate_sequences(scaled_golfo, seq_len)
+X_iraque, y_iraque = create_multivariate_sequences(scaled_iraque, seq_len)
+
+X_train = np.concatenate([X_golfo, X_iraque])
+y_train = np.concatenate([y_golfo, y_iraque])
+
+# Criando as janelas de teste (Cenário Atual)
+X_test, y_test = create_multivariate_sequences(scaled_atual, seq_len)
+
+print(f"Shape final do Treino: {X_train.shape}")
+print(f"Shape final do Teste: {X_test.shape}")
 ```
